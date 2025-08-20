@@ -1,7 +1,21 @@
-use std::{env, fmt::Display};
 use color_eyre::Result;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use ratatui::{buffer::Buffer, layout::{Constraint, Layout, Rect}, style::{palette::tailwind::{BLUE, SLATE}, Modifier, Style, Stylize}, symbols, text::Line, widgets::{Block, Borders, HighlightSpacing, List, ListItem, ListState, Padding, Paragraph, StatefulWidget, Widget, Wrap}, DefaultTerminal};
+use ratatui::{
+    DefaultTerminal,
+    buffer::Buffer,
+    layout::{Constraint, Layout, Rect},
+    style::{
+        Modifier, Style, Stylize,
+        palette::tailwind::{BLUE, SLATE},
+    },
+    symbols,
+    text::Line,
+    widgets::{
+        Block, Borders, HighlightSpacing, List, ListItem, ListState, Padding, Paragraph,
+        StatefulWidget, Widget, Wrap,
+    },
+};
+use std::{env, fmt::Display};
 
 pub struct App {
     is_running: bool,
@@ -48,10 +62,7 @@ struct Environment {
 impl Environment {
     /// Create a new struct from key, and string.
     fn new(key: String, value: String) -> Self {
-        Self {
-            key,
-            value,
-        }
+        Self { key, value }
     }
 }
 
@@ -61,7 +72,7 @@ impl Display for Environment {
     }
 }
 
-fn get_variables() -> Vec<Environment>{
+fn get_variables() -> Vec<Environment> {
     let envs = env::vars();
     let mut variables: Vec<Environment> = Vec::new();
 
@@ -83,8 +94,8 @@ impl App {
     fn handle_crossterm_events(&mut self) -> Result<()> {
         match event::read()? {
             Event::Key(key) if key.kind == KeyEventKind::Press => self.on_key_event(key),
-            Event::Mouse(_) => {},
-            Event::Resize(_, _) => {},
+            Event::Mouse(_) => {}
+            Event::Resize(_, _) => {}
             _ => {}
         }
         Ok(())
@@ -92,15 +103,15 @@ impl App {
 
     fn on_key_event(&mut self, key: KeyEvent) {
         match (key.modifiers, key.code) {
-            (_, KeyCode::Esc) =>  self.quit(),
-            (_, KeyCode::Char('q')) =>  self.quit(),
-            (KeyModifiers::CONTROL, KeyCode::Char('c')) =>  self.quit(),
-            (_, KeyCode::Char('h')|KeyCode::Left) =>  self.select_none(),
-            (_, KeyCode::Char('l')|KeyCode::Right) =>  self.select_none(),
-            (_, KeyCode::Char('k')|KeyCode::Up) =>  self.select_previous(),
-            (_, KeyCode::Char('j')|KeyCode::Down) =>  self.select_next(),
-            (_, KeyCode::Char('g')|KeyCode::PageUp) =>  self.select_first(),
-            (_, KeyCode::Char('G')|KeyCode::PageDown) =>  self.select_last(),
+            (_, KeyCode::Esc) => self.quit(),
+            (_, KeyCode::Char('q')) => self.quit(),
+            (KeyModifiers::CONTROL, KeyCode::Char('c')) => self.quit(),
+            (_, KeyCode::Char('h') | KeyCode::Left) => self.select_none(),
+            (_, KeyCode::Char('l') | KeyCode::Right) => self.select_none(),
+            (_, KeyCode::Char('k') | KeyCode::Up) => self.select_previous(),
+            (_, KeyCode::Char('j') | KeyCode::Down) => self.select_next(),
+            (_, KeyCode::Char('g') | KeyCode::PageUp) => self.select_first(),
+            (_, KeyCode::Char('G') | KeyCode::PageDown) => self.select_last(),
             _ => {}
         }
     }
@@ -117,13 +128,10 @@ impl Widget for &mut App {
             Constraint::Fill(1),
             Constraint::Length(1),
         ])
-            .areas(area);
+        .areas(area);
 
-        let [list_area, item_area] = Layout::vertical([
-            Constraint::Fill(1),
-            Constraint::Fill(1)
-        ])
-        .areas(main_area);
+        let [list_area, item_area] =
+            Layout::vertical([Constraint::Fill(1), Constraint::Fill(1)]).areas(main_area);
 
         App::render_header(header_area, buf);
         App::render_footer(footer_area, buf);
@@ -158,9 +166,7 @@ impl App {
             .env_list
             .items
             .iter()
-            .map(|item| {
-                ListItem::from(item.key.clone())
-            })
+            .map(|item| ListItem::from(item.key.clone()))
             .collect();
 
         let list = List::new(items)
@@ -190,7 +196,7 @@ impl App {
         Paragraph::new(info)
             .block(block)
             .fg(SLATE.c200)
-            .wrap( Wrap { trim: false })
+            .wrap(Wrap { trim: false })
             .render(area, buf);
     }
 }
